@@ -333,7 +333,7 @@ def produce_hw1_results():
     # print 'PRIOR LOG NEG', nb.log_prior(NEG_LABEL)
 
     print 'Evaluation'
-    print "Accuarcy pseduo param at 1: " + str(nb.evaluate_classifier_accuracy(1))
+    print "Accuarcy pseduo param at 1: " + (str(nb.evaluate_classifier_accuracy(1) * 100) + "%")
     # UNCOMMENT ME FOR GRAPH ANALYSIS
     # print 'Analyzing different levels'
     # psuedocounts = []

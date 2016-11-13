@@ -91,6 +91,7 @@ ENV/
 
 # Other ignores that we want
 CLMET
+src
 
 */target/**
 .classpath

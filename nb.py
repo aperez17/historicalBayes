@@ -27,7 +27,6 @@ TEST_DIR = os.path.join(PATH_TO_DATA, "test")
 
 def tokenize_doc(doc):
     """
-
     Tokenize a document and return its bag-of-words representation.
     doc - a string representing a document.
     returns a dictionary mapping each word to the number of times it appears in doc.
@@ -74,7 +73,6 @@ class NaiveBayes:
         This function processes the entire training set using the global PATH
         variable above.  It makes use of the tokenize_doc and update_model
         functions you will implement.
-
         num_docs: set this to e.g. 10 to train on only 10 docs from each category.
         """
 
@@ -111,7 +109,6 @@ class NaiveBayes:
     def update_model(self, bow, label):
         """
         IMPLEMENT ME!
-
         Update internal statistics given a document represented as a bag-of-words
         bow - a map from words to their counts
         label - the class of the document whose bag-of-words representation was input
@@ -141,7 +138,6 @@ class NaiveBayes:
         doc - a string representing a document.
         label - the sentiment of the document (either postive or negative)
         stop_word - a boolean flag indicating whether to stop word or not
-
         Make sure when tokenizing to lower case all of the tokens!
         """
 
@@ -154,7 +150,6 @@ class NaiveBayes:
         doc - a string representing a document.
         label - the sentiment of the document (either postive or negative)
         stop_word - a boolean flag indicating whether to stop word or not
-
         Make sure when tokenizing to lower case all of the tokens!
         """
 
@@ -163,7 +158,6 @@ class NaiveBayes:
 
     def top_n(self, label, n):
         """
-
         Returns the most frequent n tokens for documents with class 'label'.
         """
         return sorted(self.class_word_counts[label].items(), key=lambda (w,c): -c)[:n]
@@ -171,7 +165,6 @@ class NaiveBayes:
     def p_word_given_label(self, word, label):
         """
         Implement me!
-
         Returns the probability of word given label (i.e., P(word|label))
         according to this NB model.
         """
@@ -185,7 +178,6 @@ class NaiveBayes:
     def p_word_given_label_and_psuedocount(self, word, label, alpha):
         """
         Implement me!
-
         Returns the probability of word given label wrt psuedo counts.
         alpha - psuedocount parameter
         """
@@ -212,7 +204,6 @@ class NaiveBayes:
     def log_prior(self, label):
         """
         Implement me!
-
         Returns a float representing the fraction of training documents
         that are of class 'label'.
         """
@@ -222,7 +213,6 @@ class NaiveBayes:
     def unnormalized_log_posterior(self, bow, label, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter
         bow - a bag of words (i.e., a tokenized document)
         Computes the unnormalized log posterior (of doc being of class 'label').
@@ -234,10 +224,8 @@ class NaiveBayes:
     def classify(self, bow, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter.
         bow - a bag of words (i.e., a tokenized document)
-
         Compares the unnormalized log posterior for doc for both the positive
         and negative classes and returns the either POS_LABEL or NEG_LABEL
         (depending on which resulted in the higher unnormalized log posterior).
@@ -259,7 +247,6 @@ class NaiveBayes:
     def likelihood_ratio(self, word, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter.
         Returns the ratio of P(word|pos) to P(word|neg).
         """
@@ -270,7 +257,6 @@ class NaiveBayes:
     def evaluate_classifier_accuracy(self, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter.
         This function should go through the test data, classify each instance and
         compute the accuracy of the classifier (the fraction of classifications
@@ -293,6 +279,59 @@ class NaiveBayes:
                     totalCount += 1
         return (correctCount / totalCount)
 
+def produce_hw1_results():
+    # PRELIMINARIES
+
+    # # QUESTION 1.1
+    # # uncomment the next two lines when ready to answer question 1.2
+    # print "VOCABULARY SIZE: " + str(len(nb.vocab))
+    # print ''
+    #
+    # # QUESTION 1.2
+    # # uncomment the next set of lines when ready to answer qeuestion 1.2
+    # print "TOP 10 WORDS FOR CLASS " + POS_LABEL + " :"
+    # for tok, count in nb.top_n(POS_LABEL, 10):
+    #     print '', tok, count
+    # print ''
+    #
+    # print "TOP 10 WORDS FOR CLASS " + NEG_LABEL + " :"
+    # for tok, count in nb.top_n(NEG_LABEL, 10):
+    #     print '', tok, count
+    #
+    # print 'Not smooth probablities 2.1'
+    # print 'P("fantastic"|"pos") = ', nb.p_word_given_label('fantastic', POS_LABEL)
+    # print 'P("fantastic"|"neg") = ', nb.p_word_given_label('fantastic', NEG_LABEL)
+    #
+    # print 'P("boring"|"pos") = ', nb.p_word_given_label('boring', POS_LABEL)
+    # print 'P("boring"|"neg") = ', nb.p_word_given_label('boring', NEG_LABEL)
+    # print ''
+    #
+    # print 'Smooth probablities 2.4'
+    # print 'P("fantastic"|"pos") = ', nb.p_word_given_label_and_psuedocount('fantastic', POS_LABEL, 1)
+    # print 'P("fantastic"|"neg") = ', nb.p_word_given_label_and_psuedocount('fantastic', NEG_LABEL, 1)
+    #
+    # print 'P("boring"|"pos") = ', nb.p_word_given_label_and_psuedocount('boring', POS_LABEL, 1)
+    # print 'P("boring"|"neg") = ', nb.p_word_given_label_and_psuedocount('boring', NEG_LABEL, 1)
+    #
+    # print 'Question 3.1'
+    # print 'Question 3.3'
+    # print 'PRIOR LOG POS', nb.log_prior(POS_LABEL)
+    # print 'PRIOR LOG NEG', nb.log_prior(NEG_LABEL)
+
+    print 'Evaluation'
+    print "Accuarcy pseduo param at 1: " + str(nb.evaluate_classifier_accuracy(1))
+    # UNCOMMENT ME FOR GRAPH ANALYSIS
+    # print 'Analyzing different levels'
+    # psuedocounts = []
+    # accuracy = []
+    # for i in range(1,20):
+    #     psuedocounts.append(i)
+    #     accuracy.append(nb.evaluate_classifier_accuracy(i))
+    # plot_psuedocount_vs_accuracy(psuedocounts, accuracy)
+    print ''
+    print '[done.]'
+
+
 def plot_psuedocount_vs_accuracy(psuedocounts, accuracies):
     """
     A function to plot psuedocounts vs. accuries. You may want to modify this function
@@ -311,4 +350,4 @@ if __name__ == '__main__':
     nb = NaiveBayes()
     # nb.train_model()
     nb.train_model(num_docs=1000000)
-	
+    produce_hw1_results()

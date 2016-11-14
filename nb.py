@@ -30,7 +30,6 @@ TEST_DIR = os.path.join(PATH_TO_DATA, "test")
 
 def tokenize_doc(doc):
     """
-
     Tokenize a document and return its bag-of-words representation.
     doc - a string representing a document.
     returns a dictionary mapping each word to the number of times it appears in doc.
@@ -77,7 +76,6 @@ class NaiveBayes:
         This function processes the entire training set using the global PATH
         variable above.  It makes use of the tokenize_doc and update_model
         functions you will implement.
-
         num_docs: set this to e.g. 10 to train on only 10 docs from each category.
         """
 
@@ -114,7 +112,6 @@ class NaiveBayes:
     def update_model(self, bow, label):
         """
         IMPLEMENT ME!
-
         Update internal statistics given a document represented as a bag-of-words
         bow - a map from words to their counts
         label - the class of the document whose bag-of-words representation was input
@@ -144,7 +141,6 @@ class NaiveBayes:
         doc - a string representing a document.
         label - the sentiment of the document (either postive or negative)
         stop_word - a boolean flag indicating whether to stop word or not
-
         Make sure when tokenizing to lower case all of the tokens!
         """
 
@@ -157,7 +153,6 @@ class NaiveBayes:
         doc - a string representing a document.
         label - the sentiment of the document (either postive or negative)
         stop_word - a boolean flag indicating whether to stop word or not
-
         Make sure when tokenizing to lower case all of the tokens!
         """
 
@@ -166,7 +161,6 @@ class NaiveBayes:
 
     def top_n(self, label, n):
         """
-
         Returns the most frequent n tokens for documents with class 'label'.
         """
         return sorted(self.class_word_counts[label].items(), key=lambda (w,c): -c)[:n]
@@ -174,7 +168,6 @@ class NaiveBayes:
     def p_word_given_label(self, word, label):
         """
         Implement me!
-
         Returns the probability of word given label (i.e., P(word|label))
         according to this NB model.
         """
@@ -188,7 +181,6 @@ class NaiveBayes:
     def p_word_given_label_and_psuedocount(self, word, label, alpha):
         """
         Implement me!
-
         Returns the probability of word given label wrt psuedo counts.
         alpha - psuedocount parameter
         """
@@ -215,7 +207,6 @@ class NaiveBayes:
     def log_prior(self, label):
         """
         Implement me!
-
         Returns a float representing the fraction of training documents
         that are of class 'label'.
         """
@@ -225,7 +216,6 @@ class NaiveBayes:
     def unnormalized_log_posterior(self, bow, label, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter
         bow - a bag of words (i.e., a tokenized document)
         Computes the unnormalized log posterior (of doc being of class 'label').
@@ -237,10 +227,8 @@ class NaiveBayes:
     def classify(self, bow, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter.
         bow - a bag of words (i.e., a tokenized document)
-
         Compares the unnormalized log posterior for doc for both the positive
         and negative classes and returns the either POS_LABEL or NEG_LABEL
         (depending on which resulted in the higher unnormalized log posterior).
@@ -263,7 +251,6 @@ class NaiveBayes:
     def evaluate_classifier_accuracy(self, alpha):
         """
         Implement me!
-
         alpha - psuedocount parameter.
         This function should go through the test data, classify each instance and
         compute the accuracy of the classifier (the fraction of classifications
@@ -285,6 +272,7 @@ class NaiveBayes:
                         correctCount += 1
                     totalCount += 1
         return (correctCount / totalCount)
+
 
 def evaluate_nb_model() :
     print 'Evaluation'

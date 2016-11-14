@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 from __future__ import division
 
@@ -6,6 +6,9 @@ import math
 import os
 import sys
 import re
+import operator
+import numpy as np
+import matplotlib.pyplot as plt
 
 from collections import defaultdict
 
@@ -129,8 +132,8 @@ class NaiveBayes:
                 newWordCount = self.class_word_counts[label][word]
             else:
                 # New word
-                self.class_total_word_counts[label] += 1
                 self.vocab.add(word)
+            self.class_total_word_counts[label] += 1
             self.class_word_counts[label][word] = newWordCount + bow[word]
         self.class_total_doc_counts[label] += 1
 
@@ -256,16 +259,6 @@ class NaiveBayes:
                 max_label = label
         return max_label
 
-    def likelihood_ratio(self, word, alpha):
-        """
-        Implement me!
-
-        alpha - psuedocount parameter.
-        Returns the ratio of P(word|pos) to P(word|neg).
-        """
-        pos_likelihood = self.p_word_given_label_and_psuedocount(word, POS_LABEL, alpha)
-        neg_likelihood = self.p_word_given_label_and_psuedocount(word, NEG_LABEL, alpha)
-        return (pos_likelihood / neg_likelihood)
 
     def evaluate_classifier_accuracy(self, alpha):
         """
@@ -293,13 +286,47 @@ class NaiveBayes:
                     totalCount += 1
         return (correctCount / totalCount)
 
+def evaluate_nb_model() :
+    print 'Evaluation'
+    print "Accuarcy pseduo param at 1: " + (str(nb.evaluate_classifier_accuracy(1) * 100) + "%")
+    print ''
+    print "PROB OF 'WAR' EARLY: ", nb.p_word_given_label_and_psuedocount('machine', EARLY_TO_MID_1700, 1)
+    print "PROB OF 'WAR' LATE: ", nb.p_word_given_label_and_psuedocount('machine', LATE_TO_MID_1800, 1)
+    print "PROB OF 'WAR' MID: ", nb.p_word_given_label_and_psuedocount('machine', MID_TO_EARLY_1900, 1)
+    counter = 0
+    fig, ax = plt.subplots()
+    # top_words = ['the', 'of', 'and', 'a', 'to', 'in', 'is', 'you', 'that', 'it']
+    top_words = ['thou', 'thy','thee', 'art', 'ye', 'hast', 'hence', 'thine', 'doth', 'dost', 'oft']
+    freq_lists = []
+    labels = []
+    for label in nb.class_word_counts:
+        labels.append(label)
+        freq_list = []
+        label_words = nb.class_word_counts[label]
+        for word in top_words:
+            freq_list.append(nb.p_word_given_label_and_psuedocount(word, label, 1))
+        freq_lists.append(freq_list)
+    X = np.arange(len(top_words))
+    rects = []
+    for i in range(len(freq_lists)):
+        color = 'b'
+        if i is 1:
+            color = 'g'
+        elif i is 2:
+            color = 'r'
+        rects.append(ax.bar(X + (i * 0.25), freq_lists[i], color = color, width = 0.25)[0])
+    ax.set_xticks(X + .25)
+    ax.set_xticklabels(top_words)
+    ax.legend(rects, labels)
+
+    plt.show()
+    print '[done.]'
+
 def plot_psuedocount_vs_accuracy(psuedocounts, accuracies):
     """
     A function to plot psuedocounts vs. accuries. You may want to modify this function
     to enhance your plot.
     """
-
-    import matplotlib.pyplot as plt
 
     plt.plot(psuedocounts, accuracies)
     plt.xlabel('Psuedocount Parameter')
@@ -309,6 +336,5 @@ def plot_psuedocount_vs_accuracy(psuedocounts, accuracies):
 
 if __name__ == '__main__':
     nb = NaiveBayes()
-    # nb.train_model()
     nb.train_model(num_docs=1000000)
-	
+    evaluate_nb_model()

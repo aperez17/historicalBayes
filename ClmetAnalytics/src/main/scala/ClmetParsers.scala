@@ -17,6 +17,13 @@ object ClmetParser {
       case _: Throwable => None
     }
   }
+  def intOrNone(s: String): Option[Int] = {
+    try {
+      Some(s.replaceAll("s", "").toInt)
+    } catch {
+      case _: Throwable => None
+    }
+  }
 
   def parseClmetFile(xml: Elem): Vector[ClmetAnalysis] = {
     (for {
@@ -27,6 +34,8 @@ object ClmetParser {
     } yield {
       val idTxt = id.text
       val periodTxt = period.text
+      val year = (header \\ "year").flatMap(y => intOrNone(y.text)).headOption
+      val decade = (header \\ "decade").flatMap(d => intOrNone(d.text)).headOption
       val paragraphText = (
         for {
           paragraph <- text \\ "p"
@@ -34,7 +43,12 @@ object ClmetParser {
             paragraph.text
         }
       ).toVector
-      ClmetAnalysis(idTxt, periodTxt, paragraphText)
+      ClmetAnalysis(
+          id = idTxt,
+          year = year,
+          decade = decade,
+          period = periodTxt,
+          text = paragraphText)
    }).toVector
   }
 

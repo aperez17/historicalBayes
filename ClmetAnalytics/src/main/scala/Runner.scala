@@ -26,15 +26,25 @@ object Runner extends App {
   val inputFile = argMap.get("input").orElse(argMap.get("i"))
   val outputFile = argMap.get("output").orElse(argMap.get("o")).getOrElse("output.txt")
   val oneAtATime = argMap.get("s")
+  val timePeriod = argMap.get("t")
 
   inputFile.map { case path =>
     if (oneAtATime.isEmpty) {
-      val parsedXmls = parseAllXmlFromDir(path)
-      writeXmlsToDir(outputFile, parsedXmls)
+      val analyzer = ClmetAnalyzer(PeriodOutputAnalysis)
+      val parsedXmls = analyzer.parseAllXmlFromDir(path)
+      analyzer.writeXmlsToDir(outputFile, parsedXmls)
     } else {
-      val file = new java.io.File(path)
-      val parsedXml = parseXmlFromFile(file)
-      writeXmlsToDir(outputFile, parsedXml)
+      if (timePeriod.nonEmpty) {
+        val analyzer = ClmetAnalyzer(DecadeOutputAnalysis)
+        val file = new java.io.File(path)
+        val parsedXml = analyzer.parseXmlFromFile(file)
+        analyzer.writeXmlsToDir(outputFile, parsedXml)
+      } else {
+        val analyzer = ClmetAnalyzer(PeriodOutputAnalysis)
+        val file = new java.io.File(path)
+        val parsedXml = analyzer.parseXmlFromFile(file)
+        analyzer.writeXmlsToDir(outputFile, parsedXml)
+      }
     }
   }
 }

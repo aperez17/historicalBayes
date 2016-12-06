@@ -6,7 +6,53 @@ import java.io.PrintWriter
 import scala.io.Source
 import scala.xml.XML
 
-object ClmetAnalysis {
+trait OutputAnalysis{
+  def writeXmlToFile(outputPath: String, xml: ClmetAnalysis): Unit
+}
+
+object PeriodOutputAnalysis extends OutputAnalysis {
+  def writeXmlToFile(outputPath: String, xml: ClmetAnalysis) = {
+    val file = new File(outputPath + s"/${xml.period}/${xml.id}.txt")
+    val printWriter = new PrintWriter(file)
+    for {
+      paragraph <- xml.text
+    } yield {
+      printWriter.println(paragraph)
+    }
+    printWriter.close()
+  }
+}
+
+object DecadeOutputAnalysis extends OutputAnalysis {
+  val SpecificPeriods = Vector((1710,1740),(1740,1770),(1770,1800),(1800,1830),(1830,1860),(1860,1890),(1890,1920))
+  
+  def periodFromDecade(decade: Int) = {
+    def isBetweenPeriod(periods: (Int,Int), decade: Int): Boolean = {
+      val start = periods._1
+      val end = periods._2
+      start >= decade && decade < end
+    }
+    SpecificPeriods.find(periods => isBetweenPeriod(periods,decade))
+  }
+  
+  def writeXmlToFile(outputPath: String, xml: ClmetAnalysis) = {
+    for {
+      decade <- xml.decade
+      (start, end) <- periodFromDecade(decade)
+    } yield {
+      val file = new File(outputPath + s"/${start}-${end}/${xml.id}.txt")
+      val printWriter = new PrintWriter(file)
+      for {
+        paragraph <- xml.text
+      } yield {
+        printWriter.println(paragraph)
+      }
+      printWriter.close()
+    }
+  }
+}
+
+case class ClmetAnalyzer(outputAnalysisType: OutputAnalysis) {
 
   def parseFiles(files: List[File]): Vector[ClmetAnalysis] = {
     files.flatMap(file => parseXmlFromFile(file)).toVector
@@ -39,24 +85,15 @@ object ClmetAnalysis {
     parseFiles(files)
   }
   
-  def writeXmlToFile(outputPath: String, xml: ClmetAnalysis) = {
-    val file = new File(outputPath + s"/${xml.period}/${xml.id}.txt")
-    val printWriter = new PrintWriter(file)
-    for {
-      paragraph <- xml.text
-    } yield {
-      printWriter.println(paragraph)
-    }
-    printWriter.close()
-  }
-  
   def writeXmlsToDir(pathToDir: String, xmls: Vector[ClmetAnalysis]) = {
-    xmls.map(xml => writeXmlToFile(pathToDir, xml))
+    xmls.map(xml => outputAnalysisType.writeXmlToFile(pathToDir, xml))
   }
 }
 
 case class ClmetAnalysis(
     id: String,
+    year: Option[Int] = None,
+    decade: Option[Int] = None,
     period: String,
     text: Vector[String]
 )

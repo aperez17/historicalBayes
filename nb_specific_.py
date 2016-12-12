@@ -20,7 +20,7 @@ LATE_1700 = '1770-1800'
 EARLY_1800 = '1800-1830'
 MID_1800 = '1830-1860'
 LATE_1800 = '1860-1890'
-EARLY_1900 = '1890-1920'
+EARLY_1900 = '1890-1921'
 
 # Path to dataset
 if len(sys.argv) < 2:
@@ -292,13 +292,13 @@ class NaiveBayes:
         compute the accuracy of the classifier (the fraction of classifications
         the classifier gets right.
         """
-        early_1700_path = os.path.join(TRAIN_DIR, EARLY_1700)
-        mid_1700_path = os.path.join(TRAIN_DIR, MID_1700)
-        late_1700_path = os.path.join(TRAIN_DIR, LATE_1700)
-        early_1800_path = os.path.join(TRAIN_DIR, EARLY_1800)
-        mid_1800_path = os.path.join(TRAIN_DIR, MID_1800)
-        late_1800_path = os.path.join(TRAIN_DIR, LATE_1800)
-        early_1900_path = os.path.join(TRAIN_DIR, EARLY_1900)
+        early_1700_path = os.path.join(TEST_DIR, EARLY_1700)
+        mid_1700_path = os.path.join(TEST_DIR, MID_1700)
+        late_1700_path = os.path.join(TEST_DIR, LATE_1700)
+        early_1800_path = os.path.join(TEST_DIR, EARLY_1800)
+        mid_1800_path = os.path.join(TEST_DIR, MID_1800)
+        late_1800_path = os.path.join(TEST_DIR, LATE_1800)
+        early_1900_path = os.path.join(TEST_DIR, EARLY_1900)
         #print "Starting testing with paths %s and %s" % (pos_path, neg_path)
         correctCount = 0.0
         totalCount = 0.0

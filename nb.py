@@ -24,8 +24,8 @@ if len(sys.argv) < 2:
     print "i.e. /Users/alexperez/Documents/cs580/project/historicalBayes/preProcessedCorpus"
     sys.exit(1)
 PATH_TO_DATA = sys.argv[1]
-TRAIN_DIR = os.path.join(PATH_TO_DATA, "train")
-TEST_DIR = os.path.join(PATH_TO_DATA, "test")
+TRAIN_DIR = os.path.join(PATH_TO_DATA, "test")
+TEST_DIR = os.path.join(PATH_TO_DATA, "train")
 
 
 def tokenize_doc(doc):
@@ -256,9 +256,9 @@ class NaiveBayes:
         compute the accuracy of the classifier (the fraction of classifications
         the classifier gets right.
         """
-        early_to_mid_1700_path = os.path.join(TRAIN_DIR, EARLY_TO_MID_1700)
-        late_to_mid_1800_path = os.path.join(TRAIN_DIR, LATE_TO_MID_1800)
-        mid_to_early_1900_path = os.path.join(TRAIN_DIR, MID_TO_EARLY_1900)
+        early_to_mid_1700_path = os.path.join(TEST_DIR, EARLY_TO_MID_1700)
+        late_to_mid_1800_path = os.path.join(TEST_DIR, LATE_TO_MID_1800)
+        mid_to_early_1900_path = os.path.join(TEST_DIR, MID_TO_EARLY_1900)
         #print "Starting testing with paths %s and %s" % (pos_path, neg_path)
         correctCount = 0.0
         totalCount = 0.0

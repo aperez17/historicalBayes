@@ -1,6 +1,7 @@
 package clmet
 
 import ClmetAnalysis._
+import java.lang.RuntimeException
 
 object Runner extends App {
   def processArg(arg: String): String = {
@@ -30,17 +31,22 @@ object Runner extends App {
 
   inputFile.map { case path =>
     if (oneAtATime.isEmpty) {
-      val analyzer = ClmetAnalyzer(PeriodOutputAnalysis)
+      val analyzer = ClmetAnalyzer(PeriodOutputAnalysis())
       val parsedXmls = analyzer.parseAllXmlFromDir(path)
       analyzer.writeXmlsToDir(outputFile, parsedXmls)
     } else {
       if (timePeriod.nonEmpty) {
-        val analyzer = ClmetAnalyzer(DecadeOutputAnalysis)
+        val periods =  (timePeriod match {
+          case Some("five") => DecadeOutputAnalysis.FivePeriods
+          case Some("seven") => DecadeOutputAnalysis.SevenPeriods
+          case _ => (throw new RuntimeException("Invalid period range")); Vector.empty[(Int, Int)]
+        })
+        val analyzer = ClmetAnalyzer(DecadeOutputAnalysis(periods))
         val file = new java.io.File(path)
         val parsedXml = analyzer.parseXmlFromFile(file)
         analyzer.writeXmlsToDir(outputFile, parsedXml)
       } else {
-        val analyzer = ClmetAnalyzer(PeriodOutputAnalysis)
+        val analyzer = ClmetAnalyzer(PeriodOutputAnalysis())
         val file = new java.io.File(path)
         val parsedXml = analyzer.parseXmlFromFile(file)
         analyzer.writeXmlsToDir(outputFile, parsedXml)

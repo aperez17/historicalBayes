@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage ./scripts/split_to_test.sh specificPreprocessed
+# Usage ./scripts/split_to_test.sh specificPreprocessed five-test-train
 
 if [ -z "$1" ] || [ -z "$2" ]; then
     echo "Usage ./scripts/split_to_test.sh {inputDir} {outputDir}"
@@ -23,7 +23,8 @@ for i in $( ls $tmpDir ); do
     mkdir -p $outputDir/$trainDir/$i
     mkdir -p $outputDir/$testDir/$i
     count=$(ls $tmpDir/$i | wc -l)
-    iterations="$(($count/2))"
+    iterations="$(($count/(10/5)))"
+    echo "$count $iterations"
     for j in $( ls $tmpDir/$i ); do
         if [ $iterations == 0 ] ; then
             cp $tmpDir/$i/$j $outputDir/$trainDir/$i/$j

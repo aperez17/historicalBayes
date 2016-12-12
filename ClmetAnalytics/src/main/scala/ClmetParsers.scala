@@ -29,11 +29,10 @@ object ClmetParser {
     (for {
       header <- xml \\ "header"
       id <- header \\ "id"
-      period <- header \\ "period"
       text <- header \\ "text"
     } yield {
       val idTxt = id.text
-      val periodTxt = period.text
+      val period = (header \\ "period").map(y => y.text).headOption
       val year = (header \\ "year").flatMap(y => intOrNone(y.text)).headOption
       val decade = (header \\ "decade").flatMap(d => intOrNone(d.text)).headOption
       val paragraphText = (
@@ -47,7 +46,7 @@ object ClmetParser {
           id = idTxt,
           year = year,
           decade = decade,
-          period = periodTxt,
+          period = period,
           text = paragraphText)
    }).toVector
   }

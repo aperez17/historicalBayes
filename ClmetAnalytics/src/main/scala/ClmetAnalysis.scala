@@ -10,7 +10,7 @@ trait OutputAnalysis{
   def writeXmlToFile(outputPath: String, xml: ClmetAnalysis): Unit
 }
 
-object PeriodOutputAnalysis extends OutputAnalysis {
+case class PeriodOutputAnalysis() extends OutputAnalysis {
   def writeXmlToFile(outputPath: String, xml: ClmetAnalysis) = {
     val file = new File(outputPath + s"/${xml.period}/${xml.id}.txt")
     val printWriter = new PrintWriter(file)
@@ -23,19 +23,31 @@ object PeriodOutputAnalysis extends OutputAnalysis {
   }
 }
 
-object DecadeOutputAnalysis extends OutputAnalysis {
-  val SpecificPeriods = Vector((1710,1740),(1740,1770),(1770,1800),(1800,1830),(1830,1860),(1860,1890),(1890,1920))
+object DecadeOutputAnalysis {
+  val FivePeriods = Vector((1710, 1752), (1752, 1794), (1794, 1836), (1836, 1878), (1878, 1921))
+  val SevenPeriods = Vector((1710,1740),(1740,1770),(1770,1800),(1800,1830),(1830,1860),(1860,1890),(1890,1921))
+}
+
+case class DecadeOutputAnalysis(periods: Vector[(Int, Int)]) extends OutputAnalysis {
   
   def periodFromDecade(decade: Int) = {
-    def isBetweenPeriod(periods: (Int,Int), decade: Int): Boolean = {
-      val start = periods._1
-      val end = periods._2
-      start >= decade && decade < end
+    def isBetweenPeriod(periodRange: (Int,Int), decade: Int): Boolean = {
+      val start = periodRange._1
+      val end = periodRange._2
+      start <= decade && decade < end
     }
-    SpecificPeriods.find(periods => isBetweenPeriod(periods,decade))
+    val output = periods.find(periodRange => isBetweenPeriod(periodRange,decade))
+    if (output.isEmpty){
+      println("2", decade)
+    }
+    output
   }
   
   def writeXmlToFile(outputPath: String, xml: ClmetAnalysis) = {
+    val d = xml.decade
+    if (d.isEmpty) {
+      println("1", d)
+    }
     for {
       decade <- xml.decade
       (start, end) <- periodFromDecade(decade)
@@ -94,6 +106,6 @@ case class ClmetAnalysis(
     id: String,
     year: Option[Int] = None,
     decade: Option[Int] = None,
-    period: String,
+    period: Option[String] = None,
     text: Vector[String]
 )

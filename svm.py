@@ -10,6 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 import re
+import copy
 import operator
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,20 +29,41 @@ from sklearn.naive_bayes import BernoulliNB
 from collections import defaultdict
 
 # Global class labels.
-EARLY_TO_MID_1700 ='1710-1780'
-LATE_TO_MID_1800 = '1780-1850'
-MID_TO_EARLY_1900 = '1850-1920'
+GLOBAL_LABLES = {}
 
 # Path to dataset
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     print "YOU NEED TO SPECIFY YOUR LOCAL CORPUS DIRECTORY AHHHHH!!!"
     print "i.e. /Users/alexperez/Documents/cs580/project/historicalBayes/preProcessedCorpus"
     sys.exit(1)
 PATH_TO_DATA = sys.argv[1]
-TRAIN_DIR = os.path.join(PATH_TO_DATA, "train")
-TEST_DIR = os.path.join(PATH_TO_DATA, "test")
+NUM_PERIODS = int(sys.argv[2])
 
-categories = [EARLY_TO_MID_1700, LATE_TO_MID_1800, MID_TO_EARLY_1900]
+if NUM_PERIODS == 3:
+    GLOBAL_LABLES = {
+        'EARLY_TO_MID_1700': '1710-1780',
+        'LATE_TO_MID_1800': '1780-1850',
+        'MID_TO_EARLY_1900': '1850-1920'
+    }
+elif NUM_PERIODS == 5:
+    GLOBAL_LABLES = {
+        'EARLY_1700': '1710-1752',
+        'LATE_1700': '1752-1794',
+        'EARLY_1800': '1794-1836',
+        'LATE_1800': '1836-1878',
+        'EARLY_1900': '1878-1921'
+    }
+elif NUM_PERIODS == 7:
+    GLOBAL_LABLES = {
+        'EARLY_1700':'1710-1740',
+        'MID_1700': '1740-1770',
+        'LATE_1700': '1770-1800',
+        'EARLY_1800': '1800-1830',
+        'MID_1800': '1830-1860',
+        'LATE_1800': '1860-1890',
+        'EARLY_1900': '1890-1921'
+    }
+TRAIN_DIR = os.path.join(PATH_TO_DATA, "train")
 
 def tokenize_doc(doc):
     """
@@ -63,24 +85,24 @@ class SVMClassifier:
 
         # class_total_doc_counts is a dictionary that maps a class (i.e., pos/neg) to
         # the number of documents in the trainning set of that class
-        self.class_total_doc_counts = { EARLY_TO_MID_1700: 0.0,
-                                        LATE_TO_MID_1800 : 0.0,
-                                        MID_TO_EARLY_1900: 0.0 }
+        initial_doc_counts = {}
+        for label in GLOBAL_LABLES:
+            initial_doc_counts[label] = 0.0
+        self.class_total_doc_counts = initial_doc_counts
 
         # class_total_word_counts is a dictionary that maps a class (i.e., pos/neg) to
         # the number of words in the training set in documents of that class
-        self.class_total_word_counts = { EARLY_TO_MID_1700: 0.0,
-                                         LATE_TO_MID_1800: 0.0,
-                                         MID_TO_EARLY_1900: 0.0 }
+        self.class_total_word_counts = initial_doc_counts
 
         # class_word_counts is a dictionary of dictionaries. It maps a class (i.e.,
         # pos/neg) to a dictionary of word counts. For example:
         #    self.class_word_counts[POS_LABEL]['awesome']
         # stores the number of times the word 'awesome' appears in documents
         # of the positive class in the training documents.
-        self.class_word_counts = { EARLY_TO_MID_1700: defaultdict(float),
-                                   LATE_TO_MID_1800 : defaultdict(float),
-                                   MID_TO_EARLY_1900: defaultdict(float) }
+        initial_word_dicts = {}
+        for label in GLOBAL_LABLES:
+            initial_word_dicts[label] = defaultdict(float)
+        self.class_word_counts = initial_word_dicts
 
         self.pipeline = Pipeline([
             ('vectorizer',  CountVectorizer(tokenizer=lambda doc: doc, lowercase=False)),
@@ -98,11 +120,13 @@ class SVMClassifier:
         if num_docs is not None:
             print "Limiting to only %s docs per clas" % num_docs
 
-        early_to_mid_1700_path = os.path.join(TRAIN_DIR, EARLY_TO_MID_1700)
-        late_to_mid_1800_path = os.path.join(TRAIN_DIR, LATE_TO_MID_1800)
-        mid_to_early_1900_path = os.path.join(TRAIN_DIR, MID_TO_EARLY_1900)
         #print "Starting training with paths %s and %s" % (pos_path, neg_path)
-        for (p, label) in [ (early_to_mid_1700_path, EARLY_TO_MID_1700), (late_to_mid_1800_path, LATE_TO_MID_1800), (mid_to_early_1900_path, MID_TO_EARLY_1900) ]:
+        labeled_paths = []
+        for label in GLOBAL_LABLES:
+            path = os.path.join(TRAIN_DIR, GLOBAL_LABLES[label])
+            labeled_paths.append((path, GLOBAL_LABLES[label]))
+        print labeled_paths
+        for (p, label) in labeled_paths:
             filenames = os.listdir(p)
             if num_docs is not None: filenames = filenames[:num_docs]
             rows = []
@@ -121,57 +145,30 @@ class SVMClassifier:
     def fit_naive_bayes(self):
         self.pipeline.fit(self.data['text'].values, self.data['class'].values)
         examples = ['adams jackson', "lincoln johnson", "arthur cleveland"]
+        print self.pipeline.predict_proba(['thou thy thee art ye hast hence thine doth dost oft'])
+        print self.pipeline.predict(['thou thy thee art ye hast hence thine doth dost oft'])
         predictions = self.pipeline.predict(examples)
         print predictions # [1, 0]
 
-    def report_statistics_after_training(self):
-        """
-        Report a number of statistics after training.
-        """
-
-        print "REPORTING CORPUS STATISTICS"
-        print "NUMBER OF DOCUMENTS IN EARLY CLASS:", self.class_total_doc_counts[EARLY_TO_MID_1700]
-        print "NUMBER OF DOCUMENTS IN LATE CLASS:", self.class_total_doc_counts[LATE_TO_MID_1800]
-        print "NUMBER OF DOCUMENTS IN MID CLASS:", self.class_total_doc_counts[MID_TO_EARLY_1900]
-        print "NUMBER OF TOKENS IN EARLY CLASS:", self.class_total_word_counts[EARLY_TO_MID_1700]
-        print "NUMBER OF TOKENS IN LATE CLASS:", self.class_total_word_counts[LATE_TO_MID_1800]
-        print "NUMBER OF TOKENS IN MID CLASS:", self.class_total_word_counts[MID_TO_EARLY_1900]
-        print "VOCABULARY SIZE: NUMBER OF UNIQUE WORDTYPES IN TRAINING CORPUS:", len(self.vocab)
-
-    def update_model(self, bow, label):
-        """
-        IMPLEMENT ME!
-        Update internal statistics given a document represented as a bag-of-words
-        bow - a map from words to their counts
-        label - the class of the document whose bag-of-words representation was input
-        This function doesn't return anything but should update a number of internal
-        statistics. Specifically, it updates:
-          - the internal map the counts, per class, how many times each word was
-            seen (self.class_word_counts)
-          - the number of words seen for each class (self.class_total_word_counts)
-          - the vocabulary seen so far (self.vocab)
-          - the number of documents seen of each class (self.class_total_doc_counts)
-        """
-        for word in bow:
-            newWordCount = 0
-            if word in self.class_word_counts[label]:
-                newWordCount = self.class_word_counts[label][word]
-            else:
-                # New word
-                self.vocab.add(word)
-            self.class_total_word_counts[label] += 1
-            self.class_word_counts[label][word] = newWordCount + bow[word]
-        self.class_total_doc_counts[label] += 1
-
 
     def k_fold(self):
-        k_fold = KFold(n=len(self.data), n_folds=6)
+        k_fold = KFold(n=len(self.data), n_folds=10)
         scores = []
-        confusion = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-        precTotal = [0,0,0]
-        recallTotal = [0,0,0]
-        fscoreTotal = [0,0,0]
-        supportTotal = [0,0,0]
+        initial_arr = []
+        sample_arr = []
+        for i in range(NUM_PERIODS):
+            inner_arr = []
+            for i in range(NUM_PERIODS):
+                inner_arr.append(0)
+            sample_arr = inner_arr
+            initial_arr.append(inner_arr)
+        confusion = np.array(initial_arr)
+        labels = []
+        for label in GLOBAL_LABLES:
+            labels.append(GLOBAL_LABLES[label])
+        precTotal = 0
+        recallTotal = 0
+        fscoreTotal = 0
         scoreCount = 0
         for train_indices, test_indices in k_fold:
             train_text = self.data.iloc[train_indices]['text'].values
@@ -182,26 +179,17 @@ class SVMClassifier:
 
             self.pipeline.fit(train_text, train_y)
             predictions = self.pipeline.predict(test_text)
-            confusion += confusion_matrix(test_y, predictions)
-            # score = f1_score(test_y, predictions, pos_label=EARLY_TO_MID_1700)
-            precision, recall, fscore, support = score(test_y, predictions)
-            for i in range(len(precTotal)):
-                precTotal[i] = precTotal[i] + precision[i]
-                recallTotal[i] = recallTotal[i] + recall[i]
-                fscoreTotal[i] = fscoreTotal[i] + fscore[i]
-                supportTotal[i] = supportTotal[i] + support[i]
+            confusion += confusion_matrix(test_y, predictions, labels=labels)
+            precision, recall, fscore, support = score(test_y, predictions, average='weighted', labels=labels)
+            precTotal += precision
+            recallTotal += recall
+            fscoreTotal += fscore
             scoreCount += 1
 
-        for i in range(len(precTotal)):
-            precTotal[i] = precTotal[i]/scoreCount
-            recallTotal[i] = recallTotal[i]/scoreCount
-            fscoreTotal[i] = fscoreTotal[i]/scoreCount
-            supportTotal[i] = supportTotal[i]/scoreCount
         print('Total texts classified:', len(self.data))
-        print('Precision', precTotal)
-        print('Recall', recallTotal)
-        print('Fscore', fscoreTotal)
-        print('Support:', supportTotal)
+        print('Precision', precTotal/scoreCount)
+        print('Recall', recallTotal/scoreCount)
+        print('Fscore', fscoreTotal/scoreCount)
         print('Confusion matrix:')
         print(confusion)
 
@@ -213,9 +201,7 @@ class SVMClassifier:
 
     def train_model(self, num_docs=None):
         self.parse_text(num_docs)
-        #self.fit_naive_bayes()
-        #self.k_fold()
-        self.fit_bernouilli()
+        self.fit_naive_bayes()
         self.k_fold()
 
 

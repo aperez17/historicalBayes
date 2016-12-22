@@ -1,8 +1,8 @@
 #!/bin/bash
-# Usage ./scripts/pre_process_corpus.sh clmet/corpus/txt/plain
+# Usage ./scripts/pre_process_three.sh clmet/corpus/txt/plain
 
 if [ -z "$1" ] ; then
-    echo "Usage ./scripts/pre_process_corpus.sh {inputDir}"
+    echo "Usage ./scripts/pre_process_three.sh {inputDir}"
     exit 1
 fi
 
